@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: tutils
+Version: 0.1.0
+Summary: 常用机器学习 & 数据科学工具包
+Home-page: 
+Author: Your Name
+Author-email: your@email.com
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: torch
+Requires-Dist: colorlog
+Requires-Dist: tqdm
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
