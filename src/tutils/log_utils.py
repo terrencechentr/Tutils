@@ -57,7 +57,7 @@ class ColoredLogger(logging.Logger):
 # Register our custom logger class
 logging.setLoggerClass(ColoredLogger)
 
-# 添加 %(log_color)s 到格式字符串的最前面，这样颜色代码才会生效
+# Add %(log_color)s to the format string so color codes take effect
 FORMATTER = ColoredFormatter(
     "%(log_color)s[%(asctime)s] [%(levelname)s] [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",

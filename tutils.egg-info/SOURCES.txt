@@ -1,7 +1,0 @@
-pyproject.toml
-setup.py
-tutils.egg-info/PKG-INFO
-tutils.egg-info/SOURCES.txt
-tutils.egg-info/dependency_links.txt
-tutils.egg-info/requires.txt
-tutils.egg-info/top_level.txt

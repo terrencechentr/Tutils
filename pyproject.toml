@@ -1,3 +1,34 @@
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "tutils"
+version = "0.1.0"
+description = "Lightweight utilities for ML and data-science workflows"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Your Name", email = "your@email.com" }]
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "torch",
+    "colorlog",
+    "tqdm",
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourname/tutils"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

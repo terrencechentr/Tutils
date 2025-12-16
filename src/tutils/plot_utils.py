@@ -156,7 +156,7 @@ def plot_histogram(
     show=True):
     """
     Args:
-        data: (distribution, values) 形状的数据；一行一个 distribution
+        data: array shaped (distribution, values); each row is one distribution
         bins: histogram bins
         density: normalize or not
     """
@@ -238,12 +238,12 @@ def plot_multi_features(
 
     rows, cols = M.shape
 
-    # --- 自动 figsize：按行列比设置，保证像素方形 ---
-    # 让绘图区的宽高比 ≈ cols:rows；colorbar 额外留出 ~0.6 英寸
-    base_width = 10.0                          # 你可以改这个基准宽度
+    # --- auto figsize: keep pixel aspect close to square (cols:rows) ---
+    # leave ~0.6 inch extra for the colorbar
+    base_width = 10.0                          # adjust this base width if needed
     fig_w = base_width
     fig_h = base_width * (rows / cols)
-    cbar_extra = 0.6                           # colorbar 预留（英寸）
+    cbar_extra = 0.6                           # extra width for colorbar (inch)
     fig_w += cbar_extra
 
     fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=200, constrained_layout=True)
@@ -252,20 +252,20 @@ def plot_multi_features(
     ax.set_xlabel("Neuron segment")
     ax.set_ylabel("Layer x segment rows")
 
-    # 保证每个单元是正方形（关键行）
+    # keep each cell square (key line)
     ax.set_aspect('equal', adjustable='box')
 
-    # layer 边界线
+    # layer boundary lines
     for L in range(layers):
         y = L * rows_per_feature
         ax.axhline(y - 0.5, linewidth=0.2)
 
-    # NaN 显示为空白
+    # show NaN as transparent
     cmap = im.get_cmap().copy()
     cmap.set_bad(alpha=0.0)
     im.set_cmap(cmap)
 
-    # colorbar（用较小的占比，减少对主图宽度的影响）
+    # colorbar with small fraction to reduce impact on main plot width
     fig.colorbar(im, ax=ax, fraction=0.025, pad=0.015)
 
     path = _plot(fig, fname, out_dir=out_dir, show=show)

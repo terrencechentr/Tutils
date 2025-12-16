@@ -46,34 +46,34 @@ def load_df(path):
 
 def transform_jsonl(file_path, transform_func, interval=60):
     """
-    原地处理 jsonl 文件，按时间间隔自动保存到源文件，支持中断保护，使用原子操作保证数据安全。
+    Transform a jsonl file in-place with periodic atomic saves for crash safety.
     
     Args:
-        file_path: 文件路径（读取并写回同一文件）
-        transform_func: 转换函数。接收 dict，返回 dict。如果不需要保存该条数据，返回 None。
-        interval: 自动保存的时间间隔（秒），默认 60s。
+        file_path: path to the jsonl file (read and rewrite the same file)
+        transform_func: function that takes a dict and returns a dict; return None to drop a record.
+        interval: auto-save interval in seconds, default 60s.
     
-    实现原理：
-        1. 先读取所有数据到内存
-        2. 处理过程中，每隔 interval 秒就将已处理数据原子性地写回源文件
-        3. 使用临时文件 + os.replace() 保证原子性操作
-        4. 如果中途中断，至少已处理的数据已经安全写入
+    How it works:
+        1. Load all data into memory.
+        2. During processing, every `interval` seconds atomically write processed data back.
+        3. Use a temporary file + os.replace() to guarantee atomicity.
+        4. If interrupted, already processed data stays safely written.
     """
     import tempfile
     
-    # 1. 先读取所有数据到内存
-    print(f"开始读取文件: {file_path}")
+    # 1. Read all data into memory
+    print(f"Start reading file: {file_path}")
     all_lines = []
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             all_lines = [line.strip() for line in f if line.strip()]
     except FileNotFoundError:
-        print(f"✗ 文件不存在: {file_path}")
+        print(f"File not found: {file_path}")
         return
     
-    print(f"共读取 {len(all_lines)} 行数据")
+    print(f"Loaded {len(all_lines)} lines")
     
-    # 2. 处理数据
+    # 2. Process data
     processed_results = []
     buffer = []
     last_save_time = time.time()
@@ -117,7 +117,7 @@ def transform_jsonl(file_path, transform_func, interval=60):
                 processed_results.extend(buffer)
                 buffer = []
                 processed_num = len(processed_results)
-                print(f"[{time.strftime('%H:%M:%S')}] save  processed {processed_num} / {len(all_lines)} data to source file...")
+                print(f"[{time.strftime('%H:%M:%S')}] auto-saving processed {processed_num} / {len(all_lines)} records to source file...")
                 atomic_save_to_source(processed_results+all_lines[processed_num:])
                 last_save_time = time.time()
 
@@ -127,15 +127,15 @@ def transform_jsonl(file_path, transform_func, interval=60):
     finally:
         processed_results.extend(buffer)
         processed_num = len(processed_results)
-        print(f"[{time.strftime('%H:%M:%S')}] save {processed_num} data to source file...")
+        print(f"[{time.strftime('%H:%M:%S')}] saving {processed_num} records to source file...")
         
         if buffer:
             atomic_save_to_source(processed_results+all_lines[processed_num:])
-            print(f"✓ done, source file updated: {file_path}")
+            print(f"Done, source file updated: {file_path}")
         else:
             print("done (no data to save).")
         
-        # 清理临时文件（如果存在）
+        # clean up temp file if it exists
         if os.path.exists(temp_path):
             try:
                 os.remove(temp_path)

@@ -21,12 +21,12 @@ import string
 BASE62 = string.ascii_letters + string.digits   # 26 + 26 + 10 = 62
 
 def str2base62(s: str, length: int = 8) -> str:
-    # 使用sha256做hash，保证同输入一定同输出
+    # use SHA-256 for hashing to make the mapping deterministic
     h = hashlib.sha256(s.encode()).digest()   # bytes
-    # 转成一个大整数
+    # convert to a big integer
     num = int.from_bytes(h, 'big')
     
-    # 直接base62 映射出8位
+    # map directly to base62 with the requested length
     out = []
     for _ in range(length):
         num, r = divmod(num, 62)

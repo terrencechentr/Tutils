@@ -11,12 +11,13 @@ def _fmt(sec: float) -> str:
 
 class Timer:
     """
-    纯手动分段计时：
-      - 你负责在需要的位置调用 start(name) / end(name)
-      - name 仅作为标记；即便重复使用同一个 name，也被视为新的独立记录
-      - 不做“自动进入下一段”、不做“同名聚合/计数”
+    Manual, segment-based timer:
+      - You call start(name) / end(name) explicitly.
+      - name is just a tag; reusing the same name creates a new record.
+      - No auto-chaining or aggregation.
 
-    适合：你已有清晰的开始/结束钩子（hook），只需要记录每段耗时。
+    Best for cases where you already have clear start/end hooks and only need
+    to measure each segment.
     """
 
     def __init__(
@@ -42,13 +43,13 @@ class Timer:
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
         except Exception:
-            pass  # 不因 CUDA 问题报错
+            pass  # do not fail due to CUDA issues
 
     # ---- API ----
     def start(self, name: str) -> None:
         """
-        开始一段名为 `name` 的计时。要求当前没有在计时。
-        注意：此 name 不与任何历史记录绑定，后续即使再用同名，也是新的独立段。
+        Start timing a segment named `name`. Requires no segment running.
+        Reusing the same name later still creates an independent record.
         """
         if self._running:
             raise RuntimeError("SegmentTimer.start(): a segment is already running. Call end() first.")
@@ -61,8 +62,8 @@ class Timer:
 
     def end(self, name: Optional[str] = None) -> float:
         """
-        结束当前段并返回该段秒数。
-        若提供 name，则会校验是否与 start 时指定的 name 相同（帮助你捕获钩子写错的情况）。
+        Stop the current segment and return its duration in seconds.
+        If `name` is provided, validate it matches the name used at start.
         """
         if not self._running:
             raise RuntimeError("SegmentTimer.end(): no segment is running. Did you call start()?")
@@ -73,18 +74,18 @@ class Timer:
         span_ns = t1 - (self._t0_ns or t1)
         span_s = span_ns / 1e9
 
-        # 累计总时长、保存记录（同名也只是追加一条新记录，不做聚合）
+        # accumulate total time; same-name segments are just appended
         self._elapsed_ns_total += span_ns
         self._records.append({"name": self._curr_name, "seconds": span_s})
 
-        # 清理运行状态
+        # clear running state
         self._running = False
         self._curr_name = None
         self._t0_ns = None
         return span_s
 
     def reset(self, *, clear_records: bool = True) -> None:
-        """重置计时器状态；可选是否清空历史记录。"""
+        """Reset timer state; optionally clear history."""
         self._running = False
         self._curr_name = None
         self._t0_ns = None
@@ -104,16 +105,15 @@ class Timer:
     @property
     def total_seconds(self) -> float:
         """
-        所有已完成段的总时长（不包含当前未结束段）。
-        设计上你是显式 end，所以这里通常就是完整总和。
+        Total duration of all completed segments (excludes a running one).
         """
         return self._elapsed_ns_total / 1e9
 
     @property
     def records(self) -> List[Dict[str, Any]]:
         """
-        返回所有段的列表（按时间顺序）。同名也会出现多条。
-        示例： [{"name":"load","seconds":0.123}, {"name":"train","seconds":2.5}, {"name":"load","seconds":0.110}]
+        Return all segment records in time order.
+        Example: [{"name":"load","seconds":0.123}, {"name":"train","seconds":2.5}, {"name":"load","seconds":0.110}]
         """
         return list(self._records)
 
