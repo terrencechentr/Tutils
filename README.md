@@ -8,7 +8,7 @@
   `pip install git+https://github.com/yourname/tutils.git`
 
 - As a Git submodule inside another repo (keeps a clean src layout)  
-  1) `git submodule add https://github.com/yourname/tutils.git third_party/tutils`  
+  1) `git submodule add https://github.com/terrencechentr/Tutils.git third_party/tutils`  
   2) `pip install -e third_party/tutils`  or  `pip install third_party/tutils`
 
 - Local development / debugging  
